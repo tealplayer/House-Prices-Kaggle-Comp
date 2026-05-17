@@ -1,0 +1,7 @@
+data/
+*.csv
+__pycache__/
+*.pkl
+kaggle.json
+.ipynb_checkpoints/
+.DS_Store
