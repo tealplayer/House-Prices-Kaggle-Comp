@@ -1,5 +1,7 @@
-from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
+
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
@@ -10,13 +12,17 @@ from sklearn.compose import ColumnTransformer
 
 from sklearn.model_selection import cross_val_score
 
+from sklearn.preprocessing import TargetEncoder
+
 import pandas as pd
 
 data = "/Users/srgtchuckles/Downloads/train.csv"
 iowa_home_data = pd.read_csv(data)
 
-y = iowa_home_data.SalePrice
+y = iowa_home_data["SalePrice"]
 X = iowa_home_data.drop(["SalePrice"], axis=1)
+
+
 
 qual_scale = ["NA", "Po", "Fa", "TA", "Gd", "Ex"]
 
@@ -69,10 +75,7 @@ low_card_transformer = Pipeline(steps=[
 
 high_card_transformer = Pipeline(steps=[
     ("imputer", SimpleImputer(strategy="most_frequent")),
-    ("ordinal", OrdinalEncoder(
-        handle_unknown="use_encoded_value",
-        unknown_value=-1,
-    )),
+    ("target", TargetEncoder(smooth="auto", target_type="continuous", random_state=0)),
 ])
 
 numerical_transformer = SimpleImputer(strategy="median")
@@ -83,7 +86,6 @@ preprocessor = ColumnTransformer(transformers=[
     ("high", high_card_transformer, high_card_cols),
     ("num", numerical_transformer, numerical_cols),
 ])
-
 
 def get_score(n_estimators):
     model = XGBRegressor(
